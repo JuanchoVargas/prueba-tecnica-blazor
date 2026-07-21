@@ -83,6 +83,28 @@ h1 { font-size: 1.6rem; margin: 0 0 .35rem; }
 }
 .boton:hover { background: var(--primario-oscuro); }
 
+/* ---- Chips de resumen ---- */
+.chips-resumen {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .9rem;
+    flex-wrap: wrap;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: .25rem .8rem;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: #fff;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--gris-texto);
+}
+.chip-activa   { background: var(--verde-fondo); color: var(--verde-texto); border-color: transparent; }
+.chip-inactiva { background: var(--gris-fondo); color: var(--gris-texto); border-color: transparent; }
+
 /* ---- Barra de herramientas ---- */
 .barra-herramientas {
     display: flex;
@@ -93,6 +115,60 @@ h1 { font-size: 1.6rem; margin: 0 0 .35rem; }
     flex-wrap: wrap;
 }
 
+.campo-busqueda {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 380px;
+}
+
+.campo-busqueda .filtro {
+    width: 100%;
+    max-width: none;
+    padding-right: 2.2rem;
+}
+
+.limpiar-busqueda {
+    position: absolute;
+    right: .45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--gris);
+    font-size: 1.05rem;
+    line-height: 1;
+    padding: .18rem .38rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color .15s, background .15s;
+}
+.limpiar-busqueda:hover { color: var(--tinta); background: var(--gris-fondo); }
+
+/* ---- Control segmentado (filtro por estado) ---- */
+.segmentado {
+    display: inline-flex;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.segmento {
+    border: none;
+    background: transparent;
+    padding: .48rem .95rem;
+    font-size: .85rem;
+    font-family: inherit;
+    color: var(--gris-texto);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.segmento + .segmento { border-left: 1px solid var(--borde); }
+.segmento:hover { background: var(--gris-fondo); }
+.segmento-activo { background: var(--primario); color: #fff; font-weight: 600; }
+.segmento-activo:hover { background: var(--primario-oscuro); }
+
 .filtro {
     flex: 1;
     min-width: 220px;
@@ -101,9 +177,12 @@ h1 { font-size: 1.6rem; margin: 0 0 .35rem; }
     border: 1px solid var(--borde);
     border-radius: 8px;
     font-size: .95rem;
+    font-family: inherit;
     outline: none;
     transition: border-color .15s, box-shadow .15s;
 }
+/* El botón "×" propio reemplaza al de WebKit para evitar duplicado. */
+.filtro::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .filtro:focus {
     border-color: var(--primario);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
@@ -140,7 +219,79 @@ h1 { font-size: 1.6rem; margin: 0 0 .35rem; }
 }
 
 .grilla tbody tr:last-child td { border-bottom: none; }
-.grilla tbody tr:hover td { background: #f9fafb; }
+.grilla tbody tr:nth-child(even) td { background: #fbfcfe; }
+.grilla tbody tr:hover td { background: #f3f6fb; }
+.grilla td:first-child { font-variant-numeric: tabular-nums; }
+
+/* Headers de QuickGrid: renderiza <button> nativo; se neutraliza (all: unset)
+   y se estiliza como texto plano heredando la tipografía del th. */
+.quickgrid.grilla th button.col-title {
+    all: unset;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    width: 100%;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    transition: color .15s;
+}
+.quickgrid.grilla th button.col-title:hover { color: var(--primario); }
+.quickgrid.grilla th button.col-title:focus-visible {
+    outline: 2px solid var(--primario);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Indicador de orden: se anula el de QuickGrid.css y se dibuja el propio
+   solo cuando la columna está ordenada (aria-sort). */
+.quickgrid.grilla th .sort-indicator { all: unset; }
+.quickgrid.grilla th[aria-sort="ascending"] .sort-indicator::after,
+.quickgrid.grilla th[aria-sort="descending"] .sort-indicator::after {
+    font-size: .65rem;
+    color: var(--primario);
+}
+.quickgrid.grilla th[aria-sort="ascending"] .sort-indicator::after { content: "▲"; }
+.quickgrid.grilla th[aria-sort="descending"] .sort-indicator::after { content: "▼"; }
+
+/* ---- Paginador de QuickGrid ---- */
+.tarjeta-grilla .paginator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .55rem 1rem;
+    background: var(--fondo);
+    border-top: 1px solid var(--borde);
+    font-size: .85rem;
+    color: var(--gris-texto);
+}
+.tarjeta-grilla .paginator nav {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+.tarjeta-grilla .paginator nav button {
+    all: unset;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--primario);
+    font-size: 1rem;
+    transition: background .15s;
+}
+.tarjeta-grilla .paginator nav button:hover:not(:disabled) { background: rgba(37, 99, 235, .1); }
+.tarjeta-grilla .paginator nav button:disabled { color: var(--borde); cursor: default; }
+.tarjeta-grilla .paginator nav button.go-first::before    { content: "«"; }
+.tarjeta-grilla .paginator nav button.go-previous::before { content: "‹"; }
+.tarjeta-grilla .paginator nav button.go-next::before     { content: "›"; }
+.tarjeta-grilla .paginator nav button.go-last::before     { content: "»"; }
+.tarjeta-grilla .paginator .pagination-text { margin: 0 .4rem; white-space: nowrap; }
 
 /* ---- Badge ---- */
 .badge {
