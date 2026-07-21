@@ -34,24 +34,55 @@ else if (_movimientos is { Count: 0 })
 }
 else
 {
-    <div class="barra-herramientas">
-        <input class="filtro"
-               type="search"
-               placeholder="Filtrar por código o descripción…"
-               @bind="_filtro"
-               @bind:event="oninput" />
-        <span class="conteo">@MovimientosFiltrados.Count() de @_movimientos!.Count registros</span>
+    <div class="chips-resumen">
+        <span class="chip">Total @_movimientos!.Count</span>
+        <span class="chip chip-activa">Activas @_movimientos.Count(m => m.VActiva)</span>
+        <span class="chip chip-inactiva">Inactivas @_movimientos.Count(m => !m.VActiva)</span>
     </div>
 
-    <div class="tarjeta-grilla">
-        <QuickGrid Items="MovimientosFiltrados" Class="grilla">
-            <PropertyColumn Property="@(m => m.Codigo)" Title="Código" Sortable="true" />
-            <PropertyColumn Property="@(m => m.Descripcion)" Title="Descripción" Sortable="true" />
-            <TemplateColumn Title="Estado" Sortable="true" SortBy="_ordenPorEstado">
-                <EstadoBadge Activa="context.VActiva" />
-            </TemplateColumn>
-        </QuickGrid>
+    <div class="barra-herramientas">
+        <div class="campo-busqueda">
+            <input class="filtro"
+                   type="search"
+                   placeholder="Filtrar por código o descripción…"
+                   @bind="_filtro"
+                   @bind:event="oninput" />
+            @if (!string.IsNullOrEmpty(_filtro))
+            {
+                <button class="limpiar-busqueda"
+                        type="button"
+                        title="Limpiar búsqueda"
+                        @onclick="() => _filtro = string.Empty">×</button>
+            }
+        </div>
+        <div class="segmentado" role="group" aria-label="Filtrar por estado">
+            <button type="button" class="@ClaseSegmento(null)" @onclick="() => _filtroEstado = null">Todas</button>
+            <button type="button" class="@ClaseSegmento(true)" @onclick="() => _filtroEstado = true">Activas</button>
+            <button type="button" class="@ClaseSegmento(false)" @onclick="() => _filtroEstado = false">Inactivas</button>
+        </div>
+        <span class="conteo">@MovimientosFiltrados.Count() de @_movimientos.Count registros</span>
     </div>
+
+    @if (!MovimientosFiltrados.Any())
+    {
+        <div class="estado estado-vacio">
+            <p>No hay resultados para «@_filtro»</p>
+            <button class="boton" @onclick="LimpiarFiltros">Limpiar filtros</button>
+        </div>
+    }
+    else
+    {
+        <div class="tarjeta-grilla">
+            <QuickGrid Items="MovimientosFiltrados" Class="grilla" Pagination="_paginacion">
+                <PropertyColumn Property="@(m => m.Codigo)" Title="Código" Sortable="true" />
+                <PropertyColumn Property="@(m => m.Descripcion)" Title="Descripción" Sortable="true" />
+                <TemplateColumn Title="Estado" Sortable="true" SortBy="_ordenPorEstado">
+                    <EstadoBadge Activa="context.VActiva" />
+                </TemplateColumn>
+            </QuickGrid>
+            <Paginator State="_paginacion" />
+        </div>
+    }
 }
 
 @code {
@@ -59,16 +90,29 @@ else
     private string? _error;
     private bool _cargando = true;
     private string _filtro = string.Empty;
+    private bool? _filtroEstado;
+
+    private readonly PaginationState _paginacion = new() { ItemsPerPage = 8 };
 
     private readonly GridSort<TipoMovimiento> _ordenPorEstado =
         GridSort<TipoMovimiento>.ByAscending(m => m.VActiva);
 
     private IQueryable<TipoMovimiento> MovimientosFiltrados =>
         (_movimientos ?? Array.Empty<TipoMovimiento>())
+            .Where(m => _filtroEstado is null || m.VActiva == _filtroEstado)
             .Where(m => string.IsNullOrWhiteSpace(_filtro)
                 || m.Descripcion.Contains(_filtro, StringComparison.OrdinalIgnoreCase)
                 || m.Codigo.ToString().Contains(_filtro))
             .AsQueryable();
+
+    private string ClaseSegmento(bool? estado) =>
+        _filtroEstado == estado ? "segmento segmento-activo" : "segmento";
+
+    private void LimpiarFiltros()
+    {
+        _filtro = string.Empty;
+        _filtroEstado = null;
+    }
 
     protected override Task OnInitializedAsync() => CargarAsync();
 
