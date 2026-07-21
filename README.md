@@ -43,6 +43,16 @@ del ejemplo del correo.
 
 Ninguna línea de código cambia: la URL nunca está hardcodeada.
 
+### Demo en vivo
+
+https://pruebatecnica.runasp.net
+
+El despliegue auto-hospeda el endpoint mock bajo el flag de configuración
+`Api:HabilitarMockInterno`. Conectar la API real cuando sea suministrada
+consiste en apagar el flag y actualizar `Api:BaseUrl` — sin cambios de
+código. El endpoint del demo puede consultarse directamente en
+https://pruebatecnica.runasp.net/api/tiposmovimiento
+
 ## Decisiones técnicas
 
 | Decisión | Razón |
