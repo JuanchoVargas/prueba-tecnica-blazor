@@ -20,6 +20,10 @@ dotnet run --project PruebaTecnica.Web         # http://localhost:5100
 dotnet test
 ```
 
+## Captura
+
+![Grilla de tipos de movimiento](docs/captura-grilla.png)
+
 ## Nota sobre la API
 
 El correo de la prueba menciona "la siguiente API REST", pero la URL del endpoint
@@ -54,9 +58,28 @@ Ninguna línea de código cambia: la URL nunca está hardcodeada.
 
 ## Uso de herramientas de IA
 
-*(Completar antes de la entrega: descripción del workflow con Claude / Claude Code —
-CLAUDE.md como contrato de convenciones del proyecto, generación asistida con revisión
-humana de cada cambio, tests como red de seguridad.)*
+Este proyecto se desarrolló con un workflow de IA asistida de dos niveles, con
+revisión humana en cada paso:
+
+**Claude (diseño y arquitectura):** definición del plan técnico, decisiones de
+arquitectura (render mode, QuickGrid, HttpClient tipado, manejo de errores con
+resultado tipado) y generación del scaffold inicial completo de la solución,
+incluyendo los tests.
+
+**Claude Code (verificación e iteración local):** compilación, ejecución de la
+suite de tests, corrección mínima de errores (una línea: un `@using static`
+faltante en `_Imports.razor`), verificación de ambos servicios en ejecución y
+gestión del repositorio con commits atómicos.
+
+**CLAUDE.md como contrato:** el repositorio incluye un archivo `CLAUDE.md` con
+las reglas no negociables del proyecto (URL solo en configuración, prohibición
+de `new HttpClient()`, estados de UI obligatorios, sin sobre-ingeniería). Esto
+mantiene consistencia entre sesiones y entre herramientas de IA.
+
+**Control humano:** cada cambio generado fue revisado antes de commitearse; los
+tests unitarios actúan como red de seguridad para validar que el código generado
+cumple el contrato de la API. La IA aceleró la ejecución; las decisiones de
+diseño y la validación final fueron humanas.
 
 ## Estructura
 
