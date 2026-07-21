@@ -1,0 +1,10 @@
+@* Badge visual para el campo VActiva: verde si activa, gris si inactiva. *@
+
+<span class="badge @(Activa ? "badge-activa" : "badge-inactiva")">
+    @(Activa ? "Activa" : "Inactiva")
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Activa { get; set; }
+}

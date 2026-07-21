@@ -1,0 +1,93 @@
+@page "/"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject ITipoMovimientoService Servicio
+
+<PageTitle>Tipos de Movimiento</PageTitle>
+
+<h1>Tipos de Movimiento</h1>
+<p class="descripcion">
+    Datos consumidos desde la API REST y desplegados con QuickGrid.
+    Ordenamiento por columna y filtro de búsqueda incluidos.
+</p>
+
+@if (_cargando)
+{
+    <div class="estado estado-cargando" role="status">
+        <div class="spinner"></div>
+        <span>Cargando datos de la API…</span>
+    </div>
+}
+else if (_error is not null)
+{
+    <div class="estado estado-error" role="alert">
+        <p><strong>Ocurrió un problema:</strong> @_error</p>
+        <button class="boton" @onclick="CargarAsync">Reintentar</button>
+    </div>
+}
+else if (_movimientos is { Count: 0 })
+{
+    <div class="estado estado-vacio">
+        <p>La API no retornó registros.</p>
+        <button class="boton" @onclick="CargarAsync">Actualizar</button>
+    </div>
+}
+else
+{
+    <div class="barra-herramientas">
+        <input class="filtro"
+               type="search"
+               placeholder="Filtrar por código o descripción…"
+               @bind="_filtro"
+               @bind:event="oninput" />
+        <span class="conteo">@MovimientosFiltrados.Count() de @_movimientos!.Count registros</span>
+    </div>
+
+    <div class="tarjeta-grilla">
+        <QuickGrid Items="MovimientosFiltrados" Class="grilla">
+            <PropertyColumn Property="@(m => m.Codigo)" Title="Código" Sortable="true" />
+            <PropertyColumn Property="@(m => m.Descripcion)" Title="Descripción" Sortable="true" />
+            <TemplateColumn Title="Estado" Sortable="true" SortBy="_ordenPorEstado">
+                <EstadoBadge Activa="context.VActiva" />
+            </TemplateColumn>
+        </QuickGrid>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<TipoMovimiento>? _movimientos;
+    private string? _error;
+    private bool _cargando = true;
+    private string _filtro = string.Empty;
+
+    private readonly GridSort<TipoMovimiento> _ordenPorEstado =
+        GridSort<TipoMovimiento>.ByAscending(m => m.VActiva);
+
+    private IQueryable<TipoMovimiento> MovimientosFiltrados =>
+        (_movimientos ?? Array.Empty<TipoMovimiento>())
+            .Where(m => string.IsNullOrWhiteSpace(_filtro)
+                || m.Descripcion.Contains(_filtro, StringComparison.OrdinalIgnoreCase)
+                || m.Codigo.ToString().Contains(_filtro))
+            .AsQueryable();
+
+    protected override Task OnInitializedAsync() => CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        _cargando = true;
+        _error = null;
+
+        var resultado = await Servicio.ObtenerAsync();
+
+        if (resultado.Exito)
+        {
+            _movimientos = resultado.Datos;
+        }
+        else
+        {
+            _error = resultado.Error;
+        }
+
+        _cargando = false;
+    }
+}
