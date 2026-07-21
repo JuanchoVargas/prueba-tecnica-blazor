@@ -1,5 +1,7 @@
 bin/
 obj/
+publish-web/
+publish-web.zip
 *.user
 .vs/
 .vscode/
