@@ -53,6 +53,12 @@ consiste en apagar el flag y actualizar `Api:BaseUrl` — sin cambios de
 código. El endpoint del demo puede consultarse directamente en
 https://pruebatecnica.runasp.net/api/tiposmovimiento
 
+Decisión técnica: el hosting compartido del demo no permite que el servidor
+consuma su propio dominio público (restricción de loopback), así que con el
+flag activo la resolución de datos ocurre in-process a través de la misma
+interfaz `ITipoMovimientoService`; con la API real (flag apagado) se usa el
+cliente HTTP tipado, que es la implementación principal y la cubierta por tests.
+
 ## Decisiones técnicas
 
 | Decisión | Razón |
